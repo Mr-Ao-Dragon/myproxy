@@ -31,8 +31,8 @@ export default {
 		const token = url.searchParams.get('token');
 		mytoken = env.TOKEN || mytoken;
 		BotToken = env.TGTOKEN || BotToken;
-		ChatID = env.TGID || ChatID; 
-		TG =  env.TG || TG; 
+		ChatID = env.TGID || ChatID;
+		TG =  env.TG || TG;
 		subconverter = env.SUBAPI || subconverter;
 		if( subconverter.includes("http://") ){
 			subconverter = subconverter.split("//")[1];
@@ -46,7 +46,7 @@ export default {
 		if(env.LINKSUB) urls = await ADD(env.LINKSUB);
 
 		const currentDate = new Date();
-		currentDate.setHours(0, 0, 0, 0); 
+		currentDate.setHours(0, 0, 0, 0);
 		const timeTemp = Math.ceil(currentDate.getTime() / 1000);
 		const fakeToken = await MD5MD5(`${mytoken}${timeTemp}`);
 		//console.log(`${fakeUserID}\n${fakeHostName}`); // 打印fakeID
@@ -77,7 +77,7 @@ export default {
 				const URL = URLs[Math.floor(Math.random() * URLs.length)];
 				return envKey === 'URL302' ? Response.redirect(URL, 302) : fetch(new Request(URL, request));
 			}
-			return new Response(await nginx(), { 
+			return new Response(await nginx(), {
 				status: 200 ,
 				headers: {
 					'Content-Type': 'text/html; charset=UTF-8',
@@ -112,16 +112,16 @@ export default {
 			} else if(url.searchParams.has('surge')){
 				追加UA = 'surge';
 			}
-			
+
 			try {
 				const responses = await Promise.all(urls.map(async url => {
 					const cacheKey = new Request(url);
-					
+
 					try {
 						// 设置2秒超时
 						const controller = new AbortController();
 						const timeoutId = setTimeout(() => controller.abort(), 2000);
-	
+
 						const response = await fetch(url, {
 							method: 'get',
 							headers: {
@@ -130,12 +130,12 @@ export default {
 							},
 							signal: controller.signal
 						});
-	
+
 						clearTimeout(timeoutId);
-	
+
 						if (response.ok) {
 							const content = await response.text();
-							
+
 							// 请求成功，写入缓存，设置24小时的缓存时间
 							const cacheResponse = new Response(content, {
 								headers: {
@@ -171,14 +171,14 @@ export default {
 							return ""; // 缓存中也没有，返回空字符串
 						}
 					}
-				}));	
-			
+				}));
+
 				for (const response of responses) {
 					if (response) {
 						req_data += base64Decode(response) + '\n';
 					}
 				}
-			
+
 			} catch (error) {
 				console.error('处理 URL 时发生错误：', error);
 			}
@@ -187,17 +187,17 @@ export default {
 			const utf8Encoder = new TextEncoder();
 			const encodedData = utf8Encoder.encode(req_data);
 			const text = String.fromCharCode.apply(null, encodedData);
-			
+
 			//去重
 			const uniqueLines = new Set(text.split('\n'));
 			const result = [...uniqueLines].join('\n');
 			//console.log(result);
-			
+
 			const base64Data = btoa(result);
 
 			if (订阅格式 == 'base64' || token == fakeToken){
 				return new Response(base64Data ,{
-					headers: { 
+					headers: {
 						"content-type": "text/plain; charset=utf-8",
 						"Profile-Update-Interval": `${SUBUpdateTime}`,
 						"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${total}; expire=${expire}`,
@@ -213,10 +213,10 @@ export default {
 			//console.log(订阅转换URL);
 			try {
 				const subconverterResponse = await fetch(subconverterUrl);
-				
+
 				if (!subconverterResponse.ok) {
 					return new Response(base64Data ,{
-						headers: { 
+						headers: {
 							"content-type": "text/plain; charset=utf-8",
 							"Profile-Update-Interval": `${SUBUpdateTime}`,
 							"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${total}; expire=${expire}`,
@@ -227,7 +227,7 @@ export default {
 				let subconverterContent = await subconverterResponse.text();
 				if (订阅格式 == 'clash') subconverterContent =await clashFix(subconverterContent);
 				return new Response(subconverterContent, {
-					headers: { 
+					headers: {
 						"Content-Disposition": `attachment; filename*=utf-8''${encodeURIComponent(FileName)}; filename=${FileName}`,
 						"content-type": "text/plain; charset=utf-8",
 						"Profile-Update-Interval": `${SUBUpdateTime}`,
@@ -237,7 +237,7 @@ export default {
 				});
 			} catch (error) {
 				return new Response(base64Data ,{
-					headers: { 
+					headers: {
 						"content-type": "text/plain; charset=utf-8",
 						"Profile-Update-Interval": `${SUBUpdateTime}`,
 						"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${total}; expire=${expire}`,
@@ -276,12 +276,12 @@ async function nginx() {
 	<h1>Welcome to nginx!</h1>
 	<p>If you see this page, the nginx web server is successfully installed and
 	working. Further configuration is required.</p>
-	
+
 	<p>For online documentation and support please refer to
 	<a href="http://nginx.org/">nginx.org</a>.<br/>
 	Commercial support is available at
 	<a href="http://nginx.com/">nginx.com</a>.</p>
-	
+
 	<p><em>Thank you for using nginx.</em></p>
 	</body>
 	</html>
@@ -299,7 +299,7 @@ async function sendMessage(type, ip, add_data = "") {
 		} else {
 			msg = `${type}\nIP: ${ip}\n<tg-spoiler>${add_data}`;
 		}
-	
+
 		let url = "https://api.telegram.org/bot"+ BotToken +"/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
 		return fetch(url, {
 			method: 'get',
@@ -320,7 +320,7 @@ function base64Decode(str) {
 
 async function MD5MD5(text) {
 	const encoder = new TextEncoder();
-  
+
 	const firstPass = await crypto.subtle.digest('MD5', encoder.encode(text));
 	const firstPassArray = Array.from(new Uint8Array(firstPass));
 	const firstHex = firstPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -328,7 +328,7 @@ async function MD5MD5(text) {
 	const secondPass = await crypto.subtle.digest('MD5', encoder.encode(firstHex.slice(7, 27)));
 	const secondPassArray = Array.from(new Uint8Array(secondPass));
 	const secondHex = secondPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
+
 	return secondHex.toLowerCase();
 }
 
@@ -340,7 +340,7 @@ function clashFix(content) {
 		} else {
 			lines = content.split('\n');
 		}
-	
+
 		let result = "";
 		for (let line of lines) {
 			if (line.includes('type: wireguard')) {
